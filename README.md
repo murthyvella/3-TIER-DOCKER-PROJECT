@@ -86,9 +86,80 @@ The most efficient way to orchestrate all services with a single command.
 
 ## 🔗 Access Ports & Health
 | Service | URL | Note |
-| :--- | :--- | :--- |
-| **Frontend** | [http://localhost:8080](http://localhost:8080) | Web Interface |
-| **Backend** | [http://localhost:3000](http://localhost:3000) | JSON API |
+                         ┌───────────────────────┐
+                         │     End Users         │
+                         │   Browser / Client    │
+                         └──────────┬────────────┘
+                                    │
+                                    │ HTTP :8080
+                                    ▼
+                    ┌────────────────────────────────┐
+                    │      Frontend Container        │
+                    │        web-ui                  │
+                    │  Image: databridge-frontend    │
+                    │  Nginx serving React/Vite UI   │
+                    └──────────┬─────────────────────┘
+                               │
+                               │ API Calls
+                               │ HTTP :3000
+                               ▼
+                    ┌────────────────────────────────┐
+                    │       Backend Container        │
+                    │        api-server              │
+                    │  Image: databridge-backend     │
+                    │  Node.js / Express API         │
+                    └──────────┬─────────────────────┘
+                               │
+                               │ MySQL Connection
+                               │ Port 3306
+                               ▼
+                    ┌────────────────────────────────┐
+                    │       Database Container       │
+                    │         mysql-db               │
+                    │      Image: databridge-db      │
+                    │           MySQL DB             │
+                    └──────────┬─────────────────────┘
+                               │
+                               │ Persistent Storage
+                               ▼
+                    ┌────────────────────────────────┐
+                    │     Docker Named Volume        │
+                    │      databridge-db-vol         │
+                    │   /var/lib/mysql persistence   │
+                    └────────────────────────────────┘
+
+
+=================================================================
+
+                 Docker Network Communication Layer
+                      Network: databridge-net
+
+    web-ui  <───────>  api-server  <───────>  mysql-db
+
+=================================================================
+
+PORT MAPPINGS
+--------------
+Frontend  : localhost:8080  -> container:80
+Backend   : localhost:3000  -> container:3000
+Database  : internal only via Docker network
+
+=================================================================
+
+DOCKER COMPONENTS
+------------------
+1. Docker Network
+   - databridge-net
+   - Enables container-to-container communication
+
+2. Docker Volume
+   - databridge-db-vol
+   - Persists MySQL data even if container stops/removes
+
+3. Containers
+   - web-ui
+   - api-server
+   - mysql-db
 
 
 ---
