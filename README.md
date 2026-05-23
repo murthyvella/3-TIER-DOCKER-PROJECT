@@ -184,3 +184,6 @@ DOCKER COMPONENTS
 - **Stop & Remove Containers**: `docker compose down`
 - **Remove Everything (Volume included)**: `docker compose down -v`
 - **Remove Specific Volume**: `docker volume rm databridge-db-vol`
+- web view#
+- <img width="1359" height="684" alt="image" src="https://github.com/user-attachments/assets/8733c9ca-bd60-4ed6-b2c2-00dc966503d3" />
+
