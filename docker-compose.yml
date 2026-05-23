@@ -1,0 +1,54 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: databridge-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: appdb
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - databridge-db-vol:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - databridge-network
+
+  backend:
+    build: ./backend
+    container_name: databridge-backend
+    restart: always
+    environment:
+      DB_HOST: mysql
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: appdb
+    ports:
+      - "3000:3000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - databridge-network
+
+  frontend:
+    build: ./frontend
+    container_name: databridge-frontend
+    restart: always
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - databridge-network
+
+networks:
+  databridge-network:
+    driver: bridge
+
+volumes:
+  databridge-db-vol:
